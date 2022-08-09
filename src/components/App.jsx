@@ -6,56 +6,35 @@ import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
 class App extends Component {
-  static defaultProps = {
-    initialValue: 0,
-  };
   state = {
-    contacts: [
-      {
-        id: nanoid(),
-        username: 'Margaret Thatcher',
-        number: '063-459-12-56',
-        gender: 'female',
-      },
-      {
-        id: nanoid(),
-        username: 'Albert Einstein',
-        number: '067-443-89-12',
-        gender: 'male',
-      },
-      {
-        id: nanoid(),
-        username: 'Isaac Newton',
-        number: '050-645-17-79',
-        gender: 'male',
-      },
-      {
-        id: nanoid(),
-        username: 'Maria Sklodowska-Curie',
-        number: '093-555-12-22',
-        gender: 'female',
-      },
-      {
-        id: nanoid(),
-        username: 'William Shakespeare',
-        number: '063-227-91-26',
-        gender: 'male',
-      },
-    ],
+    contacts: [],
     fieldFilter: '',
   };
+  componentDidMount() {
+    const contacts = localStorage.getItem('my-contacts');
+    const parsedContacts = JSON.parse(contacts);
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+  componentDidUpdate(prevProps, prevState) {
+    const { contacts } = this.state;
+    if (contacts !== prevState.contacts) {
+      localStorage.setItem('my-contacts', JSON.stringify(contacts));
+    }
+  }
   addNewContact = newContactData => {
-    const { username } = newContactData;
+    const { name } = newContactData;
     const { contacts } = this.state;
     if (
       contacts.find(
-        contactFromBook =>
-          contactFromBook.username.toLowerCase() === username.toLowerCase()
+        contactFromPhonebook =>
+          contactFromPhonebook.name.toLowerCase() === name.toLowerCase()
       )
     ) {
-      alert(`${username} is already in contacts`);
+      alert(`${name} is already in contacts`);
       return;
-    } else if (username === '') {
+    } else if (name === '') {
       alert('Please enter your name');
       return;
     }
@@ -65,7 +44,6 @@ class App extends Component {
     }));
   };
   deleteContact = contactId => {
-    console.log(contactId);
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== contactId),
     }));
@@ -74,7 +52,7 @@ class App extends Component {
     const { fieldFilter, contacts } = this.state;
     const normalizedFilter = fieldFilter.toLowerCase().trim();
     return contacts.filter(contact =>
-      contact.username.toLowerCase().includes(normalizedFilter)
+      contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
   changeFilter = e => {
@@ -83,22 +61,24 @@ class App extends Component {
 
   render() {
     const { fieldFilter, contacts } = this.state;
+    const { addNewContact, changeFilter, getVisibleContacts, deleteContact } =
+      this;
     return (
       <div>
         <Container>
           <Section title="Phonebook">
-            <ContactForm catchSubmitInfo={this.addNewContact} />
+            <ContactForm catchSubmitInfo={addNewContact} />
           </Section>
           <Section title="Contacts">
             {contacts.length > 0 ? (
               <>
                 <Filter
                   valueFromFilter={fieldFilter}
-                  catchFilterInfo={this.changeFilter}
+                  catchFilterInfo={changeFilter}
                 />
                 <ContactList
-                  contacts={this.getVisibleContacts()}
-                  onDelete={this.deleteContact}
+                  contacts={getVisibleContacts()}
+                  onDelete={deleteContact}
                 />
               </>
             ) : (

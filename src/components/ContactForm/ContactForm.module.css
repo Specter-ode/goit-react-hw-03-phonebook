@@ -62,8 +62,8 @@
   border: 3px solid rgb(17, 1, 70);
   bottom: 5px;
   left: 5px;
-  width: calc(100% - 4px);
-  height: calc(100% - 4px);
+  width: calc(100% - 5px);
+  height: calc(100% - 5px);
 }
 
 .btn:hover:after {
